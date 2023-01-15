@@ -13,10 +13,10 @@ def bookletOrder(nbPages):
     l = []
     end = n
     for i in range(0, int(n/2), 2):
+        l.append(end-i)
         l.append(i+1)
         l.append(i+2)
         l.append(end-i-1)
-        l.append(end-i)
     return l
 
 
@@ -26,12 +26,20 @@ def reorderPdfInBookletOrder(inputFilePath, outputFilePath):
     with open(inputFilePath, 'rb') as inFile:
         input_pdf = PdfReader(inFile)
         inPages = len(input_pdf.pages)
+        first_page = True
 
         for page in bookletOrder(inPages):
             if page <= inPages:
                 output_pdf.add_page(input_pdf.pages[page-1])
             else:
-                output_pdf.add_blank_page()
+                if first_page:
+                    output_pdf.add_blank_page(
+                        width = input_pdf.pages[0].mediabox.width,
+                        height = input_pdf.pages[0].mediabox.height
+                    )
+                else:
+                    output_pdf.add_blank_page()
+            first_page = False
 
         with open(outputFilePath, "wb") as writefile:
             output_pdf.write(writefile)
